@@ -16,4 +16,5 @@ The next routes are supported (not exhaustive):
 - POST /api/<collection>/:id/<function>
 - POST /api/<collection>/:id/<documentarray>
 - GET /api/<collection>/:id/<documentarray>/:embeddedId
+- PUT /api/<collection>/:id/<documentarray>/:embeddedId
 - DELETE /api/<collection>/:id/<documentarray>/:embeddedId
