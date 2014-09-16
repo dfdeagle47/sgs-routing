@@ -1,25 +1,15 @@
-if(!mongoose.Document.sgRouteCheckoutGet){
-	require('./Document-follow');
-	require('./Document-checkout');
-	require('./Embedded-checkout');
-	require('./DocumentArray-follow');
-	require('./DocumentArray-checkout');
-	require('./Model-follow');
-	require('./Model-checkout');
-}
-
 var async = require('async');
 var _ = require('underscore');
 	_.str = require('underscore.string');
 	_.mixin(_.str.exports());
 
-var RouteHandler = function(options){
+var Router = function(options){
 	this.options = _.defaults(options||{}, {
 		initiator: 'api'
 	});
 };
 
-RouteHandler.prototype.handle = function(req, res, next){
+Router.prototype.handle = function(req, res, next){
 	var data = req.data;
 	var user = req.user;
 
@@ -38,7 +28,7 @@ RouteHandler.prototype.handle = function(req, res, next){
 	});
 };
 
-RouteHandler.prototype.followRoute = function(req, callback){
+Router.prototype.followRoute = function(req, callback){
 	var splitPath = req.route.path.split('/');
 	var me = this;
 	async.reduce(splitPath, null, function(obj, path, callback){
@@ -68,7 +58,7 @@ RouteHandler.prototype.followRoute = function(req, callback){
 	}, callback);
 };
 
-RouteHandler.prototype.checkoutRoute = function(obj, req, callback){
+Router.prototype.checkoutRoute = function(obj, req, callback){
 	var sgRouteCheckoutMeth = 'sgRouteCheckout' + _(req.method.toLowerCase()).capitalize();
 	if(typeof obj[sgRouteCheckoutMeth] === 'function'){
 		obj[sgRouteCheckoutMeth](this.getOptions(req), callback);
@@ -78,7 +68,7 @@ RouteHandler.prototype.checkoutRoute = function(obj, req, callback){
 	}
 };
 
-RouteHandler.prototype.getOptions = function(req){
+Router.prototype.getOptions = function(req){
 	return {
 		req: req,
 		user: req.user,
@@ -86,11 +76,11 @@ RouteHandler.prototype.getOptions = function(req){
 	}
 };
 
-RouteHandler.prototype.getModel = function(collectionName){
+Router.prototype.getModel = function(collectionName){
 	return this.getModelsByCollectionName()[collectionName];
 };
 
-RouteHandler.prototype.getModelsByCollectionName = function(){
+Router.prototype.getModelsByCollectionName = function(){
 	if(!this._modelsByCollectionName){
 		this._modelsByCollectionName = {};
 		var me = this;
@@ -101,8 +91,5 @@ RouteHandler.prototype.getModelsByCollectionName = function(){
 	return this._modelsByCollectionName;
 };
 
-module.exports = function(options){
-	var routeHandler = new RouteHandler(options);
-	return routeHandler.handle.bind(routeHandler);
-};
+module.exports = Router;
 
