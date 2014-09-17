@@ -1,7 +1,17 @@
 var EmbeddedTestSchema = new mongoose.Schema({
 	embeddedAttr: {
 		type: String
-	}
+	},
+	linkedTest: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Test'
+	},
+	embeddedTests2: [{
+		linkedTest2: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Test'
+		}
+	}]
 });
 
 EmbeddedTestSchema.statics.getVirtualCollAttr = function(options, callback){

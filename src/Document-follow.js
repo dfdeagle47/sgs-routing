@@ -2,6 +2,8 @@ var _ = require('underscore');
 	_.str = require('underscore.string');
 	_.mixin(_.str.exports());
 
+var async = require('async')
+
 module.exports = function(mongoose){
 	mongoose.Document.prototype.sgRouteGet = function(path, options, callback){
 		var camelizedSgRouteGetPath = _('sgRouteGet_'+path).camelize();

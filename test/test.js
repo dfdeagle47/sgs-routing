@@ -13,7 +13,14 @@ var Router = require('../src/index')(mongoose);
 var router = new Router({});
 var route = router.handle.bind(router);
 
-var test = mongoose.model('Test')({embeddedTests: [{}]});
+var test = mongoose.model('Test')({embeddedTests: [{embeddedTests2: [{}]}]});
+test.linkedTest = test._id;
+
+var tt = test.embeddedTests[0].embeddedTests2[0];
+test.embeddedTests[0].embeddedTests2[0].linkedTest2 = test._id;
+tt.linkedTest = test._id;
+
+debugger
 
 var createData = function(req, res, next){
 	req.data = {};
@@ -52,16 +59,19 @@ describe('Testing the mongoose routehandler module.', function () {
 
 	// it('test', function(done){
 	// 	var mytest = test;
-	// 	mytest.embeddedTests = undefined;
-	// 	test.linkedTest = test._id;
-	// 	test.save(function(err, test){
-	// 		test.populate('linkedTest', function(err){
-	// 			mytest.populate('linkedTest.linkedTest', function(err){
-	// 				console.log(mytest.toObject())
-	// 			});
+	// 	//mytest.linkedTest = test._id;
+
+	// 	mytest.save(function(err, test){
+
+	// 		mytest.embeddedTests[0].populate('embeddedTests.embeddedTests2.linkedTest2', function(err){ 
+	// 			console.log(mytest.embeddedTests)
+	// 			// mytest.populate('linkedTest.linkedTest', function(err){
+	// 			// 	console.log(mytest.toObject())
+	// 			// });
 	// 		});
 	// 	});
 	// });
+	// return
 
 	it('POST /api/<collection>', function(done){
 		app.post('/api/tests', createData, route, function(req, res){
