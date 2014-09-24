@@ -42,7 +42,7 @@ TestSchema.methods.getVirtualInstanceAttr = function(options, callback){
 };
 
 TestSchema.methods.doThat = function(options, callback){
-	callback(null, options.data);
+	callback(null, options.req.body);
 };
 
 var TestModel = mongoose.model('Test', TestSchema);

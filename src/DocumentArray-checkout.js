@@ -4,20 +4,26 @@ var _ = require('underscore');
 var async = require('async');
 
 module.exports = function(mongoose){
-	mongoose.Types.DocumentArray.prototype.sgRouteCheckoutGet = function(options, callback){
-		callback(null, this);
-	};
 
-	mongoose.Types.DocumentArray.prototype.sgRouteCheckoutPut = function(options, callback){
-		callback('Route checkout put on document array not supported');
-	};	
+	_(mongoose.Types.DocumentArray.prototype).extend({
 
-	mongoose.Types.DocumentArray.prototype.sgRouteCheckoutPost = function(options, callback){
-		var embeddedDoc = this.create(options.req.data);
-		embeddedDoc.sgRouteCheckoutPostFromParent(this, options, callback);
-	};
+		sgRouteCheckoutGet: function(options, callback){
+			callback(null, this);
+		},
 
-	mongoose.Types.DocumentArray.prototype.sgRouteCheckoutDelete = function(options, callback){
-		callback('Route checkout delete on document array not supported');
-	};
+		sgRouteCheckoutPut: function(options, callback){
+			callback('Route checkout put on document array not supported');
+		},
+
+		sgRouteCheckoutPost: function(options, callback){
+			var embeddedDoc = this.create(options.req.body);
+			embeddedDoc.sgRouteCheckoutPostFromParent(this, options, callback);
+		},
+
+		sgRouteCheckoutDelete: function(options, callback){
+			callback('Route checkout delete on document array not supported');
+		}
+
+	});
+
 };

@@ -4,45 +4,34 @@ var _ = require('underscore');
 var async = require('async');
 
 module.exports = function(mongoose){
-	mongoose.Document.prototype.sgRouteCheckoutGet = function(options, callback){
-		callback(null, this);
-	};
 
-	mongoose.Document.prototype._sgRouteCheckoutSet = function(options, callback){
-		if(!options || !options.req || !options.req.data){
-			return this.sgRouteCheckoutGet(options, callback);
+	_(mongoose.Document.prototype).extend({
+
+		sgRouteCheckoutGet: function(options, callback){
+			callback(null, this);
+		},
+
+		sgRouteCheckoutPut: function(options, callback){
+			if(!options || !options.req){
+				return this.sgRouteCheckoutGet(options, callback);
+			}
+
+			var me = this;
+			this.set(options.req.body, options, function(err){
+				if(err){
+					return callback(err);
+				}
+				me.save(callback);
+			});
+		},	
+
+		sgRouteCheckoutPost: function(options, callback){
+			callback(null, this);
+		},
+
+		sgRouteCheckoutDelete: function(options, callback){
+			this.remove(callback);
 		}
 
-		var data = options.req.data;
-		var me = this;
-		async.each(_(data).keys(), 
-		function(key, callback){
-			var camelizedSetPath = _('set_'+key).camelize();
-			if(typeof this[camelizedSetPath] === 'function'){
-				me[camelizedSetPath](data[key], options, callback);
-			}
-			else{
-				me.set(key, data[key]);
-				callback();
-			}
-		}, callback);
-	};	
-
-	mongoose.Document.prototype.sgRouteCheckoutPut = function(options, callback){
-		var me = this;
-		this._sgRouteCheckoutSet(options, function(err){
-			if(err){
-				return callback(err);
-			}
-			me.save(callback);
-		});
-	};	
-
-	mongoose.Document.prototype.sgRouteCheckoutPost = function(options, callback){
-		callback(null, this);
-	};
-
-	mongoose.Document.prototype.sgRouteCheckoutDelete = function(options, callback){
-		this.remove(callback);
-	};
+	});
 };

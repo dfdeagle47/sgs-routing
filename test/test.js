@@ -1,19 +1,22 @@
 var assert = require('assert');
 var express = require('express');
 global.mongoose = require('mongoose');
+require('sgs-mongoose-getset')(mongoose);
 var supertest = require('supertest');
 var _ = require('underscore');
 var bodyParser = require('body-parser');
 
 require('./TestModel');
 
-var Router = require('./coverage/instrument/src/index')(mongoose);
-//var Router = require('../src/index')(mongoose);
+Error.stackTraceLimit = 100;
+
+//var Router = require('./coverage/instrument/src/index')(mongoose);
+var Router = require('../src/index')(mongoose);
 
 var router = new Router({});
 var route = router.route.bind(router);
 
-// var test = mongoose.model('Test')({embeddedTests: [{embeddedTests2: [{}]}]});
+//var test = mongoose.model('Test')({embeddedTests: [{embeddedTests2: [{}]}]});
 // test.linkedTest = test._id;
 
 // var tt = test.embeddedTests[0].embeddedTests2[0];
@@ -22,14 +25,16 @@ var route = router.route.bind(router);
 
 
 var createData = function(req, res, next){
-	req.data = {};
-	_(req.data).extend(req.body);
-	_(req.data).extend({paginate: {}});
+	_(req.query).extend({paginate: {}});
+
+	req.user = {
+		_id: 'logged_user'
+	};
 
 	next();
 };
 
-describe('Testing the mongoose routehandler module.', function () {
+describe('Testing the sgs-routing module.', function () {
 	'use strict';
 
 	before(function (done) {
@@ -75,7 +80,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	it('POST /api/<collection>', function(done){
 		app.post('/api/tests', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
-			assert.equal(res.data.attr, req.data.attr);
+			assert.equal(res.data.attr, req.body.attr);
 			testId = res.data.id;
 			mongoose.model('Test').count({}, function(err, count){
 				if(err){
@@ -97,6 +102,15 @@ describe('Testing the mongoose routehandler module.', function () {
 		});
 
 		st.get('/api/tests').end();
+	});
+
+	it('GET /api/user', function(done){
+		app.get('/api/user', createData, route(), function(req, res){
+			assert.equal(res.data._id, 'logged_user');
+			done();
+		});
+
+		st.get('/api/user').end();
 	});
 
 	it('GET /api/<collection/<attribute>', function(done){
@@ -122,8 +136,8 @@ describe('Testing the mongoose routehandler module.', function () {
 	it('PUT /api/<collection>/:id', function(done){
 		app.put('/api/tests/:id', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
-			assert.equal(res.data.linkedTest.toString(), req.data.linkedTest);
-			assert.equal(res.data.attr, req.data.attr)
+			assert.equal(res.data.linkedTest.toString(), req.body.linkedTest);
+			assert.equal(res.data.attr, req.body.attr)
 			done();
 		});
 
@@ -186,12 +200,12 @@ describe('Testing the mongoose routehandler module.', function () {
 
 	it('PUT /api/<collection>/:id/<documentarray>/:embeddedid', function(done){
 		app.put('/api/tests/:id/embedded-tests/:embeddedid', createData, route(), function(req, res){
-			assert.equal(res.data.embeddedAttr, req.data.embeddedAttr);
+			assert.equal(res.data.embeddedAttr, req.body.embeddedAttr);
 			mongoose.model('Test').findById(testId, function(err, test){
 				if(err){
 					return done(err);
 				}
-				assert.equal(test.embeddedTests.id(embeddedTestId).embeddedAttr, req.data.embeddedAttr);
+				assert.equal(test.embeddedTests.id(embeddedTestId).embeddedAttr, req.body.embeddedAttr);
 				done();
 			});
 		});

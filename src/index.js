@@ -1,5 +1,3 @@
-var Router = require('./Router');
-
 module.exports = function(mongoose){
 
 	if(!mongoose.Document.prototype.sgRouteCheckoutGet){
@@ -12,5 +10,5 @@ module.exports = function(mongoose){
 		require('./Model-checkout')(mongoose);
 	}
 
-	return Router;
+	return require('./Router')(mongoose);
 };

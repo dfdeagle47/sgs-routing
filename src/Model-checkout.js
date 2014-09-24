@@ -1,21 +1,33 @@
+var _ = require('underscore');
+
 module.exports = function(mongoose){
-	mongoose.Model.getRoot = function(options, callback){
-		this.find(options.req.data.filters).sort(options.req.data.sort).skip(options.req.data.paginate.offset).limit(options.req.data.paginate.limit).exec(callback);
-	};
 
-	mongoose.Model.sgRouteCheckoutGet = function(options, callback){
-		this.getRoot(options, callback);
-	};
+	_(mongoose.Model).extend({
 
-	mongoose.Model.sgRouteCheckoutPut = function(options, callback){
-		callback('Route checkout put on model not supported');
-	};	
+		getRoot: function(options, callback){
+			this.find(options.req.query.filters)
+				.sort(options.req.query.sort)
+				.skip(options.req.query.paginate.offset)
+				.limit(options.req.query.paginate.limit)
+				.exec(callback);
+		},
 
-	mongoose.Model.sgRouteCheckoutPost = function(options, callback){
-		this.create(options.req.data, callback);
-	};
+		sgRouteCheckoutGet: function(options, callback){
+			this.getRoot(options, callback);
+		},
 
-	mongoose.Model.sgRouteCheckoutDelete = function(options, callback){
-		callback('Route checkout delete on model not supported');
-	};
+		sgRouteCheckoutPut: function(options, callback){
+			callback('Route checkout put on model not supported');
+		},	
+
+		sgRouteCheckoutPost: function(options, callback){
+			this.create(options.req.body, callback);
+		},
+
+		sgRouteCheckoutDelete: function(options, callback){
+			callback('Route checkout delete on model not supported');
+		}
+
+	});
+
 };
