@@ -7,20 +7,19 @@ var bodyParser = require('body-parser');
 
 require('./TestModel');
 
-//var Router = require('./coverage/instrument/src/index')(mongoose);
-var Router = require('../src/index')(mongoose);
+var Router = require('./coverage/instrument/src/index')(mongoose);
+//var Router = require('../src/index')(mongoose);
 
 var router = new Router({});
-var route = router.handle.bind(router);
+var route = router.route.bind(router);
 
-var test = mongoose.model('Test')({embeddedTests: [{embeddedTests2: [{}]}]});
-test.linkedTest = test._id;
+// var test = mongoose.model('Test')({embeddedTests: [{embeddedTests2: [{}]}]});
+// test.linkedTest = test._id;
 
-var tt = test.embeddedTests[0].embeddedTests2[0];
-test.embeddedTests[0].embeddedTests2[0].linkedTest2 = test._id;
-tt.linkedTest = test._id;
+// var tt = test.embeddedTests[0].embeddedTests2[0];
+// test.embeddedTests[0].embeddedTests2[0].linkedTest2 = test._id;
+// tt.linkedTest = test._id;
 
-debugger
 
 var createData = function(req, res, next){
 	req.data = {};
@@ -74,7 +73,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	// return
 
 	it('POST /api/<collection>', function(done){
-		app.post('/api/tests', createData, route, function(req, res){
+		app.post('/api/tests', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
 			assert.equal(res.data.attr, req.data.attr);
 			testId = res.data.id;
@@ -91,7 +90,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});
 
 	it('GET /api/<collection>', function(done){
-		app.get('/api/tests', createData, route, function(req, res){
+		app.get('/api/tests', createData, route(), function(req, res){
 			assert(res.data instanceof Array)
 			assert.equal(res.data.length, 1);
 			done();
@@ -101,7 +100,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});
 
 	it('GET /api/<collection/<attribute>', function(done){
-		app.get('/api/tests/virtual-coll-attr', createData, route, function(req, res){
+		app.get('/api/tests/virtual-coll-attr', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
 			assert.equal(res.data.id, testId);
 			done();
@@ -111,7 +110,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('GET /api/<collection>/:id', function(done){
-		app.get('/api/tests/:id', createData, route, function(req, res){
+		app.get('/api/tests/:id', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
 			assert.equal(res.data.id, req.params.id);
 			done();
@@ -121,7 +120,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('PUT /api/<collection>/:id', function(done){
-		app.put('/api/tests/:id', createData, route, function(req, res){
+		app.put('/api/tests/:id', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
 			assert.equal(res.data.linkedTest.toString(), req.data.linkedTest);
 			assert.equal(res.data.attr, req.data.attr)
@@ -132,7 +131,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});
 
 	it('GET /api/<collection>/:id/<attribute> with attribute in schema', function(done){
-		app.get('/api/tests/:id/linked-test', createData, route, function(req, res){
+		app.get('/api/tests/:id/linked-test', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
 			assert.equal(res.data.id, testId);
 			done();
@@ -142,7 +141,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('GET /api/<collection>/:id/<attribute> with attribute in method', function(done){
-		app.get('/api/tests/:id/virtual-instance-attr', createData, route, function(req, res){
+		app.get('/api/tests/:id/virtual-instance-attr', createData, route(), function(req, res){
 			assert(res.data instanceof mongoose.Document);
 			assert.equal(res.data.id, testId);
 			done();
@@ -152,7 +151,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('POST /api/<collection>/:id/<attribute>', function(done){
-		app.post('/api/tests/:id/do-that', createData, route, function(req, res){
+		app.post('/api/tests/:id/do-that', createData, route(), function(req, res){
 			assert.equal(res.data.action, 'myaction');
 			done();
 		});
@@ -161,7 +160,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('POST /api/<collection>/:id/<documentarray>', function(done){
-		app.post('/api/tests/:id/embedded-tests', createData, route, function(req, res){
+		app.post('/api/tests/:id/embedded-tests', createData, route(), function(req, res){
 			assert.equal(res.data.embeddedAttr, 'myembeddedattr');
 			embeddedTestId = res.data.id;
 			mongoose.model('Test').findById(testId, function(err, test){
@@ -177,7 +176,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('GET /api/<collection>/:id/<documentarray>/:embeddedid', function(done){
-		app.get('/api/tests/:id/embedded-tests/:embeddedid', createData, route, function(req, res){
+		app.get('/api/tests/:id/embedded-tests/:embeddedid', createData, route(), function(req, res){
 			assert.equal(res.data.id, embeddedTestId);
 			done();
 		});
@@ -186,16 +185,22 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('PUT /api/<collection>/:id/<documentarray>/:embeddedid', function(done){
-		app.put('/api/tests/:id/embedded-tests/:embeddedid', createData, route, function(req, res){
+		app.put('/api/tests/:id/embedded-tests/:embeddedid', createData, route(), function(req, res){
 			assert.equal(res.data.embeddedAttr, req.data.embeddedAttr);
-			done();
+			mongoose.model('Test').findById(testId, function(err, test){
+				if(err){
+					return done(err);
+				}
+				assert.equal(test.embeddedTests.id(embeddedTestId).embeddedAttr, req.data.embeddedAttr);
+				done();
+			});
 		});
 
 		st.put('/api/tests/' + testId + '/embedded-tests/' + embeddedTestId).send({embeddedAttr: 'myembeddedattr2'}).end();
 	});		
 
 	it('DELETE /api/<collection>/:id/<documentarray>/:embeddedid', function(done){
-		app['delete']('/api/tests/:id/embedded-tests/:embeddedid', createData, route, function(req, res){
+		app['delete']('/api/tests/:id/embedded-tests/:embeddedid', createData, route(), function(req, res){
 			assert.equal(res.data.id, embeddedTestId);
 			mongoose.model('Test').findById(testId, function(err, test){
 				if(err){
@@ -210,7 +215,7 @@ describe('Testing the mongoose routehandler module.', function () {
 	});	
 
 	it('DELETE /api/<collection>/:id', function(done){
-		app['delete']('/api/tests/:id', createData, route, function(req, res){
+		app['delete']('/api/tests/:id', createData, route(), function(req, res){
 			assert.equal(res.data.id, testId);
 			mongoose.model('Test').findById(testId, function(err, test){
 				if(err){

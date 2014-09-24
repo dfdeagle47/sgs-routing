@@ -1,8 +1,3 @@
-var _ = require('underscore');
-	_.str = require('underscore.string');
-	_.mixin(_.str.exports());
-var async = require('async');
-
 module.exports = function(mongoose){
 	mongoose.Model.getRoot = function(options, callback){
 		this.find(options.req.data.filters).sort(options.req.data.sort).skip(options.req.data.paginate.offset).limit(options.req.data.paginate.limit).exec(callback);

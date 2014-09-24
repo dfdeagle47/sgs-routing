@@ -9,34 +9,38 @@ var Router = function(options){
 	});
 };
 
-Router.prototype.handle = function(req, res, next){
-	var data = req.data;
-	var user = req.user;
+Router.prototype.route = function(options){
+	options = _.extend(options||{}, this.options);
 
 	var me = this;
-	this.followRoute(req, function(err, obj){
-		if(err){
-			return next(err);
-		}
-		me.checkoutRoute(obj, req, function(err, checkoutObj){
+	return function(req, res, next){
+		var data = req.data;
+		var user = req.user;
+
+		me.followRoute(req, options, function(err, obj){
 			if(err){
 				return next(err);
 			}
-			res.data = checkoutObj;
-			next();
+			me.checkoutRoute(obj, req, options, function(err, checkoutObj){
+				if(err){
+					return next(err);
+				}
+				res.data = checkoutObj;
+				next();
+			});
 		});
-	});
+	};
 };
 
-Router.prototype.followRoute = function(req, callback){
+Router.prototype.followRoute = function(req, options, callback){
 	var splitPath = req.route.path.split('/');
 	var me = this;
 	async.reduce(splitPath, null, function(obj, path, callback){
-		if(!path || path === me.options.initiator){
+		if(!path || path === options.initiator){
 			return callback(null, path);
 		}
 		//get model from collection name
-		if(obj === me.options.initiator){
+		if(obj === options.initiator){
 			return callback(null, me.getModel(path));
 		}
 		if(_(path).startsWith(':')){
@@ -50,7 +54,7 @@ Router.prototype.followRoute = function(req, callback){
 		}
 
 		if(typeof obj.sgRouteGet === 'function'){
-			obj.sgRouteGet(path, me.getOptions(req), callback);
+			obj.sgRouteGet(path, me.getFollowCheckoutOptions(req), callback);
 		}
 		else{
 			callback(null, obj);
@@ -58,17 +62,17 @@ Router.prototype.followRoute = function(req, callback){
 	}, callback);
 };
 
-Router.prototype.checkoutRoute = function(obj, req, callback){
+Router.prototype.checkoutRoute = function(obj, req, options, callback){
 	var sgRouteCheckoutMeth = 'sgRouteCheckout' + _(req.method.toLowerCase()).capitalize();
 	if(typeof obj[sgRouteCheckoutMeth] === 'function'){
-		obj[sgRouteCheckoutMeth](this.getOptions(req), callback);
+		obj[sgRouteCheckoutMeth](this.getFollowCheckoutOptions(req), callback);
 	}
 	else{
 		callback(null, obj);
 	}
 };
 
-Router.prototype.getOptions = function(req){
+Router.prototype.getFollowCheckoutOptions = function(req){
 	return {
 		req: req,
 		user: req.user,
