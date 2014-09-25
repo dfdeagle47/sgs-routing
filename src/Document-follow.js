@@ -14,6 +14,8 @@ module.exports = function(mongoose){
 				if(err){
 					return callback(err);
 				}
+				
+				//Bad smell message chains (me.schema.path...)
 				if(me.schema.path(path) && me.schema.path(path).instance === 'ObjectID' && val instanceof mongoose.Types.ObjectId){
 					me.populate(path, function(err){
 						if(err){
@@ -25,7 +27,6 @@ module.exports = function(mongoose){
 				else{
 					callback(null, val);
 				}
-				
 			});
 		}
 	});
