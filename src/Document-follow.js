@@ -16,7 +16,8 @@ module.exports = function(mongoose){
 				}
 
 				//Bad smell message chains (me.schema.path...) (voir schema helpers)
-				if(me.schema.path(path) && me.schema.path(path).instance === 'ObjectID' && val instanceof mongoose.Types.ObjectId){
+				//if(me.schema.path(path) && me.schema.path(path).instance === 'ObjectID' && val instanceof mongoose.Types.ObjectId){
+				if(me.schema.isRef(path) && val instanceof mongoose.Types.ObjectId || me.schema.isRefArray(path)){
 					me.populate(path, function(err){
 						if(err){
 							return callback(err);
