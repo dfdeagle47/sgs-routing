@@ -1,7 +1,7 @@
 var assert = require('assert');
 var express = require('express');
 global.mongoose = require('mongoose');
-require('sgs-mongoose-getset')(mongoose);
+require('sgs-mongoose-additions')(mongoose);
 var supertest = require('supertest');
 var _ = require('underscore');
 var bodyParser = require('body-parser');

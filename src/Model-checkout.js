@@ -7,8 +7,8 @@ module.exports = function(mongoose){
 		getRoot: function(options, callback){
 			this.find(options.req.query.filters)
 				.sort(options.req.query.sort)
-				.skip(options.req.query.paginate.offset)
-				.limit(options.req.query.paginate.limit)
+				.skip(options.req.query.paginate && options.req.query.paginate.offset)
+				.limit(options.req.query.paginate && options.req.query.paginate.limit)
 				.exec(callback);
 		},
 
