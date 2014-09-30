@@ -28,7 +28,7 @@ module.exports = function(mongoose){
 		},
 
 		_sgRouteGetFromFixPath: function(path, options, callback){
-			this.get(path, options, callback);
+			this[options.action ? 'do' : 'get'](path, options, callback);
 		}
 
 	});

@@ -9,14 +9,16 @@ module.exports = function(mongoose){
 	_(mongoose.Document.prototype).extend({
 
 		sgRouteGet: function(path, options, callback){
+			if(options.action){
+				return this.do(path, options, callback);
+			}
+
 			var me = this;
 			this.get(path, options, function (err, val) {
 				if(err){
 					return callback(err);
 				}
 
-				//Bad smell message chains (me.schema.path...) (voir schema helpers)
-				//if(me.schema.path(path) && me.schema.path(path).instance === 'ObjectID' && val instanceof mongoose.Types.ObjectId){
 				if(me.schema.isRef(path) && val instanceof mongoose.Types.ObjectId || me.schema.isRefArray(path)){
 					me.populate(path, function(err){
 						if(err){

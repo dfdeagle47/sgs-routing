@@ -58,7 +58,8 @@ module.exports = function(mongoose){
 					}
 
 					if(typeof obj.sgRouteGet === 'function'){
-						obj.sgRouteGet(path, me.getFollowCheckoutOptions(req), callback);
+						var action = req.method === 'POST' && obj instanceof mongoose.Document && _(splitPath[splitPath.length-1]).camelize() === path && typeof obj[path] === 'function';
+						obj.sgRouteGet(path, me.getFollowOptions(req, action), callback);
 					}
 					else{
 						callback(null, obj);
@@ -86,7 +87,7 @@ module.exports = function(mongoose){
 
 				var sgRouteCheckoutMeth = 'sgRouteCheckout' + _(req.method.toLowerCase()).capitalize();
 				if(typeof res.data[sgRouteCheckoutMeth] === 'function'){
-					res.data[sgRouteCheckoutMeth](this.getFollowCheckoutOptions(req), function(err, checkoutData){
+					res.data[sgRouteCheckoutMeth](this.getCheckoutOptions(req), function(err, checkoutData){
 						if(err){
 							return next(err);
 						}
@@ -100,11 +101,31 @@ module.exports = function(mongoose){
 			}
 		},
 
-		getFollowCheckoutOptions: function(req){
-			return {
+		getFollowOptions: function(req, action){
+			var options = {
 				req: req,
 				user: req.user
+			};
+
+			if(action){
+				options.action = true;
+				options.data = req.body;
 			}
+			else{
+				options.action = false;
+				options.data = req.query;
+			}
+
+			return options;
+		},
+
+		getCheckoutOptions: function(req, action){
+			var options = {
+				req: req,
+				user: req.user
+			};
+
+			return options;
 		},
 
 		sgRouteGet: function(path, options, callback){
