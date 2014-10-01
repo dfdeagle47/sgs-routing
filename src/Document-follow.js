@@ -8,8 +8,15 @@ module.exports = function(mongoose){
 
 	_(mongoose.Document.prototype).extend({
 
-		sgRouteFollow: function(path, options, callback){
-			if(this.sgRouteIsLastPartPost(path, options) && typeof this[path] === 'function'){
+		sgRouteFollowPath: function (path) {
+			return path;
+		},
+
+		sgRouteFollow: function (path, options, callback) {
+			var initialPath = path;
+			path = this.sgRouteFollowPath(initialPath);
+
+			if(options.req.method === 'POST' && this.sgRouteIsLastPart(initialPath, options) && typeof this[path] === 'function'){
 				return this.do(path, options, callback);
 			}
 
@@ -33,10 +40,9 @@ module.exports = function(mongoose){
 			});
 		},
 
-		sgRouteIsLastPartPost: function(path, options){
-			var isLastPathPart = _(options.req.splitPath[options.req.splitPath.length-1]).camelize() === path;
-
-			return options.req.method === 'POST' && isLastPathPart;
+		sgRouteIsLastPart: function(path, options){
+			var splitPath = options.req.splitPath;
+			return _(splitPath[splitPath.length-1]).camelize() === path;
 		}
 
 	});
