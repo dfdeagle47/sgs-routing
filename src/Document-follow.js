@@ -9,7 +9,7 @@ module.exports = function(mongoose){
 	_(mongoose.Document.prototype).extend({
 
 		sgRouteFollow: function(path, options, callback){
-			if(this.sgRouteIsAction(path, options)){
+			if(this.sgRouteIsLastPartPost(path, options) && typeof this[path] === 'function'){
 				return this.do(path, options, callback);
 			}
 
@@ -33,9 +33,10 @@ module.exports = function(mongoose){
 			});
 		},
 
-		sgRouteIsAction: function(path, options){
+		sgRouteIsLastPartPost: function(path, options){
 			var isLastPathPart = _(options.req.splitPath[options.req.splitPath.length-1]).camelize() === path;
-			return options.req.method === 'POST' && isLastPathPart && typeof this[path] === 'function';
+
+			return options.req.method === 'POST' && isLastPathPart;
 		}
 
 	});
