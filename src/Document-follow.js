@@ -8,8 +8,8 @@ module.exports = function(mongoose){
 
 	_(mongoose.Document.prototype).extend({
 
-		sgRouteGet: function(path, options, callback){
-			if(options.action){
+		sgRouteFollow: function(path, options, callback){
+			if(this.sgRouteIsAction(path, options)){
 				return this.do(path, options, callback);
 			}
 
@@ -31,7 +31,13 @@ module.exports = function(mongoose){
 					callback(null, val);
 				}
 			});
+		},
+
+		sgRouteIsAction: function(path, options){
+			var isLastPathPart = _(options.req.splitPath[options.req.splitPath.length-1]).camelize() === path;
+			return options.req.method === 'POST' && isLastPathPart && typeof this[path] === 'function';
 		}
+
 	});
 };
 

@@ -6,16 +6,16 @@ module.exports = function(mongoose){
 
 	_(mongoose.Model).extend({
 
-		sgRouteGet: function(path, options, callback){
+		sgRouteFollow: function(path, options, callback){
 			if(typeof path === 'string'){
-				this._sgRouteGetFromFixPath(path, options, callback);
+				this._sgRouteFollowFromFixPath(path, options, callback);
 			}
 			else{
-				this._sgRouteGetFromVariablePath(path, options, callback);
+				this._sgRouteFollowFromVariablePath(path, options, callback);
 			}
 		},
 
-		_sgRouteGetFromVariablePath: function(path, options, callback){
+		_sgRouteFollowFromVariablePath: function(path, options, callback){
 			if(path.id){
 				this.findById(path.id, callback);
 			}
@@ -27,7 +27,7 @@ module.exports = function(mongoose){
 			}
 		},
 
-		_sgRouteGetFromFixPath: function(path, options, callback){
+		_sgRouteFollowFromFixPath: function(path, options, callback){
 			this[options.action ? 'do' : 'get'](path, options, callback);
 		}
 

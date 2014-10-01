@@ -36,6 +36,7 @@ module.exports = function(mongoose){
 			
 			return function(req, res, next){
 				var splitPath = req.route.path.split('/').slice(1);
+				req.splitPath = splitPath;
 				async.reduce(splitPath, null, function(obj, path, callback){
 
 					if(path === options.initiator){
@@ -57,9 +58,8 @@ module.exports = function(mongoose){
 						path[key] = value;
 					}
 
-					if(typeof obj.sgRouteGet === 'function'){
-						var action = req.method === 'POST' && obj instanceof mongoose.Document && _(splitPath[splitPath.length-1]).camelize() === path && typeof obj[path] === 'function';
-						obj.sgRouteGet(path, me.getFollowOptions(req, action), callback);
+					if(typeof obj.sgRouteFollow === 'function'){
+						obj.sgRouteFollow(path, me.getFollowOptions(req), callback);
 					}
 					else{
 						callback(null, obj);
@@ -107,12 +107,10 @@ module.exports = function(mongoose){
 				user: req.user
 			};
 
-			if(action){
-				options.action = true;
+			if(req.method === 'POST'){
 				options.data = req.body;
 			}
 			else{
-				options.action = false;
 				options.data = req.query;
 			}
 
@@ -128,7 +126,7 @@ module.exports = function(mongoose){
 			return options;
 		},
 
-		sgRouteGet: function(path, options, callback){
+		sgRouteFollow: function(path, options, callback){
 			if(path === 'user'){
 				return callback(null, options.user);
 			}
