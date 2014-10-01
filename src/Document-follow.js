@@ -8,13 +8,13 @@ module.exports = function(mongoose){
 
 	_(mongoose.Document.prototype).extend({
 
-		sgRouteFollowPath: function (path) {
+		sgRouteFollowPath: function (path, options) {
 			return path;
 		},
 
 		sgRouteFollow: function (path, options, callback) {
 			var initialPath = path;
-			path = this.sgRouteFollowPath(initialPath);
+			path = this.sgRouteFollowPath(initialPath, options);
 
 			if(options.req.method === 'POST' && this.sgRouteIsLastPart(initialPath, options) && typeof this[path] === 'function'){
 				return this.do(path, options, callback);
