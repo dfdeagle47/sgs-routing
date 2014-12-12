@@ -14,7 +14,7 @@ module.exports = function(mongoose){
 				if(err){
 					return callback(err);
 				}
-				me.parent().save(function(err){
+				me.rootParent().save(function(err){
 					if(err){
 						return callback(err);
 					}
@@ -26,7 +26,8 @@ module.exports = function(mongoose){
 		sgRouteCheckoutPostFromParent: function(parentArray, options, callback){
 			parentArray.push(this);
 			var me = this;
-			this.parent().save(function(err, doc){
+
+			this.rootParent().save(function(err, doc){
 				if(err){
 					return callback(err);
 				}
@@ -40,13 +41,23 @@ module.exports = function(mongoose){
 				if(err){
 					return callback(err);
 				}
-				me.parent().save(function(err){
+				me.rootParent().save(function(err){
 					if(err){
 						return callback(err);
 					}
 					callback(null, me);
 				});
 			});
+		},
+
+		rootParent: function () {
+			var parent = this.parent();
+
+			while (typeof parent.parent === 'function') {
+				parent = parent.parent();
+			}
+
+			return parent;
 		}
 
 	});
