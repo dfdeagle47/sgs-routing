@@ -51,7 +51,7 @@ module.exports = function(mongoose){
 		},
 
 		rootParent: function (parentArray) {
-			var parent = this.parent() || parentArray;
+			var parent = this.parent() || parentArray._parent;
 
 			while (typeof parent.parent === 'function') {
 				parent = parent.parent();
