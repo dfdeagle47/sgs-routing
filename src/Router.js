@@ -130,7 +130,11 @@ module.exports = function(mongoose){
 			if(path === 'user'){
 				return callback(null, options.user);
 			}
-			callback(null, this.getModelsByCollectionName()[path]);
+			callback(null, this.getModelByCollectionName(path));
+		},
+
+		getModelByCollectionName: function(name){
+			return this.getModelsByCollectionName()[name];
 		},
 
 		getModelsByCollectionName: function(){
