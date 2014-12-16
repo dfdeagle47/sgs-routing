@@ -27,7 +27,7 @@ module.exports = function(mongoose){
 			parentArray.push(this);
 			var me = this;
 
-			this.rootParent().save(function(err, doc){
+			this.rootParent(parentArray).save(function(err, doc){
 				if(err){
 					return callback(err);
 				}
@@ -50,8 +50,8 @@ module.exports = function(mongoose){
 			});
 		},
 
-		rootParent: function () {
-			var parent = this.parent();
+		rootParent: function (parentArray) {
+			var parent = (this || parentArray).parent();
 
 			while (typeof parent.parent === 'function') {
 				parent = parent.parent();
