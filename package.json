@@ -12,7 +12,7 @@
 		"async": "^0.2.5",
 		"underscore": "1.7.0",
 		"underscore.string": "2.3.3",
-		"sgs-mongoose-additions": "git+ssh://git@github.com:Sagacify/sgs-mongoose-additions.git#1.0.0"
+		"sgs-mongoose-additions": "git+ssh://git@github.com:dfdeagle47/sgs-mongoose-additions.git#1.0.0"
 	},
 	"devDependencies": {
 		"express": "^4.8.8",
